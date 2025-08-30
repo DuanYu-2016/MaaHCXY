@@ -1,11 +1,199 @@
 {
-    "MyTask1": {},
-    "MyTask2": {},
-    "MyTask3": {},
-    "MyTask4": {
-        "recognition": "Custom",
-        "custom_recognition": "my_reco_222",
-        "action": "Custom",
-        "custom_action": "my_action_111"
-    }
+    "投骰子": {
+        "recognition": "TemplateMatch",
+        "template": ["骰子图标.png","骰子图标无.png"],
+        "action": "Click",
+        "post_delay": 5000,
+        "next": ["获得奖励","开始战斗","购买骰子","巡游一周","豹富的小金库"],
+        "timeout":8000,
+        "on_error":"投骰子"
+        },
+    "获得奖励": {
+        "recognition": "OCR",
+        "expected": "获得奖励",
+        "action": "Click",
+        "target_offset": [0,-100,0,0],
+        "post_delay": 2000,
+        "next": ["获得奖励","投骰子"]
+        },
+    "开始战斗": {
+    	"recognition": "OCR",
+    	"expected": "开始战斗",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "载入队列"
+       },
+    "载入队列": {
+    	"recognition": "OCR",
+    	"expected": "载入队列",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "选择队列"
+       },
+    "选择队列": {
+    	"recognition": "OCR",
+    	"expected": "当前编队",
+    	"action": "Click",
+    	"target_offset": [0,100,0,0],
+    	"post_delay": 500,
+    	"next": ["确认队列","作战开始"]
+       },
+    "确认队列": {
+    	"recognition": "OCR",
+    	"expected": "确",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "确定覆盖队列"
+       },
+    "确定覆盖队列": {
+    	"recognition": "OCR",
+    	"expected": "确定",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "作战开始"
+       },
+    "作战开始": {
+    	"recognition": "OCR",
+    	"expected": "作战开始",
+    	"action": "Click",
+    	"rate_limit":3000,
+    	"timeout":30000,
+    	"next": ["开始战斗1"]
+       },
+    "开始战斗1": {
+    	"recognition": "OCR",
+    	"expected": "开始战斗",
+    	"action": "Click",
+    	"rate_limit":5000,
+    	"timeout":600000,
+    	"next": ["领取奖励","开始战斗2"]
+       },
+    "开始战斗2": {
+    	"recognition": "OCR",
+    	"expected": "开始战斗",
+    	"action": "Click",
+    	"rate_limit":5000,
+    	"timeout":600000,
+    	"next": "领取奖励"
+       },
+    "领取奖励": {
+    	"recognition": "OCR",
+    	"expected": "领取奖励",
+    	"action": "Click",
+    	"pre_delay":3000,
+    	"post_delay": 500,
+    	"next": "获得奖励"
+       },
+    "购买骰子": {
+    	"recognition": "OCR",
+    	"expected": "前往",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "购买数量最大"
+       },
+    "购买数量最大": {
+    	"recognition": "TemplateMatch",
+    	"template": "最大购买数量.png",
+    	"threshold":0.9,
+    	"action": "Click",
+    	"post_delay": 1000,
+    	"next": "点击购买"
+       },
+    "点击购买": {
+    	"recognition": "OCR",
+    	"expected": "购买",
+    	"action": "Click",
+    	"target":[630,490,250,40],
+    	"post_delay": 1000,
+    	"next": "点击屏幕继续"
+       },
+    "点击屏幕继续": {
+    	"recognition": "OCR",
+    	"expected": "点击屏幕继续",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "投骰子"
+       },
+    "巡游一周": {
+    	"recognition": "OCR",
+    	"expected": "再次巡游",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "确认巡游深度"
+       },
+    "确认巡游深度": {
+    	"recognition": "OCR",
+    	"expected": "确认",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "继续前进"
+       },
+    "继续前进": {
+    	"recognition": "OCR",
+    	"expected": "继续前进",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "获得奖励",
+    	"timeout":3000,
+    	"on_error":"投骰子"
+       },
+    "豹富的小金库": {
+    	"recognition": "OCR",
+    	"expected": "剩余次数",
+    	"action": "DoNothing",
+    	"post_delay": 500,
+    	"next": "小金库投骰子"
+       },
+     "小金库投骰子": {
+        "recognition": "TemplateMatch",
+        "template": ["双骰子.png","骰子图标.png","骰子图标无.png"],
+        "action": "Click",
+        "post_wait_freezes": 3000,
+        "next": ["获得奖励-小金库","购买骰子-小金库","传送回归"]
+        },
+    "获得奖励-小金库": {
+        "recognition": "OCR",
+        "expected": "获得奖励",
+        "action": "Click",
+        "target_offset": [0,-100,0,0],
+        "post_delay": 1000,
+        "next": ["豹富的小金库","传送回归"]
+        },
+    "购买骰子-小金库": {
+    	"recognition": "OCR",
+    	"expected": "前往",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "购买数量最大-小金库"
+       },
+    "购买数量最大-小金库": {
+    	"recognition": "TemplateMatch",
+    	"template": "最大购买数量.png",
+    	"threshold":0.9,
+    	"action": "Click",
+    	"post_delay": 1000,
+    	"next": "点击购买-小金库"
+       },
+    "点击购买-小金库": {
+    	"recognition": "OCR",
+    	"expected": "购买",
+    	"action": "Click",
+    	"target":[630,490,250,40],
+    	"post_delay": 1000,
+    	"next": "点击屏幕继续-小金库"
+       },
+    "点击屏幕继续-小金库": {
+    	"recognition": "OCR",
+    	"expected": "点击屏幕继续",
+    	"action": "Click",
+    	"post_delay": 500,
+    	"next": "豹富的小金库"
+       },
+    "传送回归": {
+    	"recognition": "OCR",
+    	"expected": "回归",
+    	"action": "Click",
+    	"post_delay": 1000,
+    	"next": ["传送回归","投骰子"]
+       }
 }
