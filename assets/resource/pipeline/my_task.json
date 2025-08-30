@@ -3,7 +3,7 @@
         "recognition": "TemplateMatch",
         "template": ["骰子图标.png","骰子图标无.png"],
         "action": "Click",
-        "post_delay": 1000,
+        "post_wait_freezes": {"time":2000, "threshold":0.8},
         "next": ["豹富的小金库","获得奖励","开始战斗","购买骰子","巡游一周","投骰子"]
         },
     "获得奖励": {
@@ -146,7 +146,7 @@
         "template": ["双骰子.png","骰子图标.png","骰子图标无.png"],
         "action": "Click",
         "post_wait_freezes": 1000,
-        "next": ["获得奖励-小金库","购买骰子-小金库","传送回归"]
+        "next": ["获得奖励-小金库","购买骰子-小金库","传送回归","小金库投骰子"]
         },
     "获得奖励-小金库": {
         "recognition": "OCR",
