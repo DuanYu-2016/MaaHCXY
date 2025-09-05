@@ -22,10 +22,11 @@
         }
     ],
     "agent": {
-        "child_exec": "python",
-        "child_args": [
-            "{PROJECT_DIR}/agent/main.py"
-        ]
+    "child_exec": "{PROJECT_DIR}/python/python.exe",
+    "child_args": [
+      "-u",
+      "{PROJECT_DIR}/agent/main.py"
+    ]
     },
     "task": [
         {
