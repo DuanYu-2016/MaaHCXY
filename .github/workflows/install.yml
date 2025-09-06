@@ -4,12 +4,12 @@ on:
   push:
     tags:
       - "v*"
-    # branches:
-    #   - "**"
-    # paths:
-    #   - ".github/workflows/install.yml"
-    #   - "assets/**.json"
-    #   - "ci/**"
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/install.yml"
+      - "assets/**"
+      - "**.py"
   pull_request:
     branches:
       - "**"
@@ -18,6 +18,10 @@ on:
       - "assets/**"
       - "**.py"
   workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   meta:
@@ -51,21 +55,23 @@ jobs:
 
   install:
     needs: meta
-    runs-on: macos-latest
     strategy:
       matrix:
         # os: [win, macos, linux, android]
         # arch: [x86_64, aarch64]
         include:
-          - os: win
-            arch: x86_64
-          - os: macos
-            arch: aarch64
-          - os: linux
-            arch: x86_64
+          - arch: x86_64
+            runner: windows-latest
+          - arch: aarch64
+            runner: windows-11-arm
+          # - os: macos
+          #   arch: aarch64
+          # - os: linux
+          #   arch: x86_64
           # - os: android
           #   arch: aarch64
       fail-fast: false
+    runs-on: ${{ matrix.runner }}
 
     steps:
       - uses: actions/checkout@v4
@@ -81,36 +87,53 @@ jobs:
           out-file-path: "deps"
           extract: true
 
-      - name: Setup Embed Python
-        shell: powershell
-        run: |
-          ./ci/setup_embed_python.ps1
-
-      - name: Install Resource
-        shell: bash
-        env:
-          TARGET_OS: ${{ matrix.os }}
-        run: |
-          python ./ci/install.py ${{ needs.meta.outputs.tag }}
+      - name: Download MaaFramework
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: MaaXYZ/MaaFramework
+          fileName: "MAA-win-${{ matrix.arch }}*"
+          tag: "v4.4.1"
+          out-file-path: "deps"
+          extract: true
 
       - name: Download MFAAvalonia
-        if: matrix.os != 'android'
         id: download_mfa
         uses: robinraju/release-downloader@v1
         with:
           repository: SweetSmellFox/MFAAvalonia
-          fileName: "MFAAvalonia-*-${{ (matrix.os == 'win' && 'win') || (matrix.os == 'macos' && 'osx') || (matrix.os == 'linux' && 'linux') }}-${{ (matrix.arch == 'x86_64' && 'x64') || (matrix.arch == 'aarch64' && 'arm64') }}*"
-          latest: true
+          fileName: "MFAAvalonia-*-win-${{ matrix.arch == 'x86_64' && 'x64' || 'arm64' }}*"
+          tag: "v1.6.5"
           out-file-path: "MFA"
           extract: true
 
-      - name: Clean up MFAAvalonia archive
-        if: matrix.os != 'android'
+      - name: Clean up MFAAvalonia archive on Windows
         shell: bash
         run: |
           ARCHIVE_FILE_PATH="${{ fromJson(steps.download_mfa.outputs.downloaded_files)[0] }}"
           rm -f "${ARCHIVE_FILE_PATH}"
-          echo "Archive cleanup command executed for MFAAvalonia."
+          echo "Archive cleanup command executed for MFAAvalonia on Windows."
+
+      - name: Setup Embed Python on Windows
+        shell: bash
+        run: |
+          python tools/ci/setup_embed_python.py
+          
+      - name: Download Python dependencies
+        shell: bash
+        run: |
+          ./install/python/python.exe tools/ci/download_deps.py --deps-dir install/deps
+
+      - name: Install
+        shell: bash
+        run: |
+          ./install/python/python.exe ./tools/ci/install.py ${{ needs.meta.outputs.tag }}
+          if [ -d "MFA" ]; then
+            echo "Copying MFA files to install directory..."
+            mkdir -p install
+            cp -rpvn MFA/. install/
+          else
+            echo "MFA directory not found, skipping copy."
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
