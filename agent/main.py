@@ -13,8 +13,6 @@ def main():
     from maa.agent.agent_server import AgentServer
     from maa.toolkit import Toolkit
 
-    import custom
-
     try:
         Toolkit.init_option("./")
         socket_id = sys.argv[-1]
