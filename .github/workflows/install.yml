@@ -4,12 +4,12 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - "**"
-    paths:
-      - ".github/workflows/install.yml"
-      - "assets/**"
-      - "**.py"
+    # branches:
+    #   - "**"
+    # paths:
+    #   - ".github/workflows/install.yml"
+    #   - "assets/**.json"
+    #   - "ci/**"
   pull_request:
     branches:
       - "**"
@@ -54,8 +54,17 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        os: [win, macos, linux, android]
-        arch: [aarch64, x86_64]
+        # os: [win, macos, linux, android]
+        # arch: [x86_64, aarch64]
+        include:
+          - os: win
+            arch: x86_64
+          - os: macos
+            arch: aarch64
+          - os: linux
+            arch: x86_64
+          # - os: android
+          #   arch: aarch64
       fail-fast: false
 
     steps:
@@ -71,6 +80,18 @@ jobs:
           latest: true
           out-file-path: "deps"
           extract: true
+
+      - name: Setup Embed Python
+        shell: powershell
+        run: |
+          ./ci/setup_embed_python.ps1
+
+      - name: Install Resource
+        shell: bash
+        env:
+          TARGET_OS: ${{ matrix.os }}
+        run: |
+          python ./ci/install.py ${{ needs.meta.outputs.tag }}
 
       - name: Download MFAAvalonia
         if: matrix.os != 'android'
@@ -90,28 +111,6 @@ jobs:
           ARCHIVE_FILE_PATH="${{ fromJson(steps.download_mfa.outputs.downloaded_files)[0] }}"
           rm -f "${ARCHIVE_FILE_PATH}"
           echo "Archive cleanup command executed for MFAAvalonia."
-
-      - name: Setup Embed Python
-        shell: powershell
-        run: |
-          ./ci/setup_embed_python.ps1
-
-      - name: Install
-        shell: bash
-        run: |
-          python ./install.py ${{ needs.meta.outputs.tag }}
-
-          if [[ "${{ matrix.os }}" != "android" ]]; then
-            if [ -d "MFA" ]; then
-              echo "Copying MFA files to install directory..."
-              mkdir -p install
-              rsync -av --ignore-existing MFA/ install/
-            else
-              echo "MFA directory not found, skipping copy."
-            fi
-          else
-            echo "Skipping copy MFA for Android."
-          fi
 
       - uses: actions/upload-artifact@v4
         with:
