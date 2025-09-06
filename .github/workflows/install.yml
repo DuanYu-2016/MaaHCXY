@@ -93,23 +93,16 @@ jobs:
         run: |
           python ./ci/install.py ${{ needs.meta.outputs.tag }}
 
-      - name: Download MFA
-        if: ${{ matrix.os != 'android' && steps.mfa_naming.outputs.mfa_os != 'unknown' && steps.mfa_naming.outputs.mfa_arch != 'unknown' }}
+      - name: Download MFAAvalonia
+        if: matrix.os != 'android'
+        id: download_mfa
         uses: robinraju/release-downloader@v1
         with:
           repository: SweetSmellFox/MFAAvalonia
-          fileName: "MFAAvalonia-*-${{ steps.mfa_naming.outputs.mfa_os }}-${{ steps.mfa_naming.outputs.mfa_arch }}*"
-          tag: v1.6.5
-          out-file-path: "MFAAvalonia"
+          fileName: "MFAAvalonia-*-${{ (matrix.os == 'win' && 'win') || (matrix.os == 'macos' && 'osx') || (matrix.os == 'linux' && 'linux') }}-${{ (matrix.arch == 'x86_64' && 'x64') || (matrix.arch == 'aarch64' && 'arm64') }}*"
+          latest: true
+          out-file-path: "MFA"
           extract: true
-
-      - name: Install MFAAvalonia
-        if: ${{ matrix.os != 'android' }}
-        shell: bash
-        run: |
-          rm -rf MFAAvalonia/resource/base/model
-          cp -r MFAAvalonia/* install
-          rm -f install/MFAAvalonia-*.zip
 
       - uses: actions/upload-artifact@v4
         with:
