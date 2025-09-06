@@ -6,10 +6,10 @@ on:
       - "v*"
     # branches:
     #   - "**"
-    # paths:
-    #   - ".github/workflows/install.yml"
-    #   - "assets/**.json"
-    #   - "ci/**"
+    paths:
+      - ".github/workflows/install.yml"
+      - "assets/**.json"
+      - "ci/**"
   pull_request:
     branches:
       - "**"
