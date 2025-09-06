@@ -91,6 +91,11 @@ jobs:
           rm -f "${ARCHIVE_FILE_PATH}"
           echo "Archive cleanup command executed for MFAAvalonia."
 
+      - name: Setup Embed Python on Windows
+        shell: bash
+        run: |
+        python assets/setup_embed_python.py
+
       - name: Install
         shell: bash
         run: |

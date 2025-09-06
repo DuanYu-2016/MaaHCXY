@@ -76,8 +76,8 @@ def install_agent():
         dirs_exist_ok=True,
     )
     shutil.copytree(
-        working_dir / "python",
-        install_path / "python",
+        working_dir / "assets" / "MaaFWLib",
+        install_path/ "python" / "Lib",
         dirs_exist_ok=True,
     )
 
