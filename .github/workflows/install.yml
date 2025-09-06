@@ -81,17 +81,6 @@ jobs:
           out-file-path: "deps"
           extract: true
 
-      - name: Download MFAAvalonia
-        if: matrix.os != 'android'
-        id: download_mfa
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: SweetSmellFox/MFAAvalonia
-          fileName: "MFAAvalonia-*-${{ (matrix.os == 'win' && 'win') || (matrix.os == 'macos' && 'osx') || (matrix.os == 'linux' && 'linux') }}-${{ (matrix.arch == 'x86_64' && 'x64') || (matrix.arch == 'aarch64' && 'arm64') }}*"
-          latest: true
-          out-file-path: "MFA"
-          extract: true
-
       - name: Setup Embed Python
         shell: powershell
         run: |
@@ -104,43 +93,50 @@ jobs:
         run: |
           python ./ci/install.py ${{ needs.meta.outputs.tag }}
 
-          if [[ "${{ matrix.os }}" != "android" ]]; then
-            if [ -d "MFA" ]; then
-              echo "Copying MFA files to install directory..."
-              mkdir -p install
-              rsync -av --ignore-existing MFA/ install/
-            else
-              echo "MFA directory not found, skipping copy."
-            fi
+      - name: Set up MFAAvalonia naming
+        id: mfa_naming
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "win" ]; then
+            echo "mfa_os=win" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.os }}" = "macos" ]; then
+            echo "mfa_os=osx" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.os }}" = "linux" ]; then
+            echo "mfa_os=linux" >> $GITHUB_OUTPUT
           else
-            echo "Skipping copy MFA for Android."
+            echo "mfa_os=unknown" >> $GITHUB_OUTPUT
           fi
+
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            echo "mfa_arch=x64" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.arch }}" = "aarch64" ]; then
+            echo "mfa_arch=arm64" >> $GITHUB_OUTPUT
+          else
+            echo "mfa_arch=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download MFA
+        if: ${{ matrix.os != 'android' && steps.mfa_naming.outputs.mfa_os != 'unknown' && steps.mfa_naming.outputs.mfa_arch != 'unknown' }}
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: SweetSmellFox/MFAAvalonia
+          fileName: "MFAAvalonia-*-${{ steps.mfa_naming.outputs.mfa_os }}-${{ steps.mfa_naming.outputs.mfa_arch }}*"
+          tag: v1.6.5
+          out-file-path: "MFAAvalonia"
+          extract: true
+
+      - name: Install MFAAvalonia
+        if: ${{ matrix.os != 'android' }}
+        shell: bash
+        run: |
+          rm -rf MFAAvalonia/resource/base/model
+          cp -r MFAAvalonia/* install
+          rm -f install/MFAAvalonia-*.zip
 
       - uses: actions/upload-artifact@v4
         with:
           name: MaaHCXY-${{ matrix.os }}-${{ matrix.arch }}
           path: "install"
-
-  changelog:
-    name: Generate changelog
-    runs-on: ubuntu-latest
-    outputs:
-      release_body: ${{ steps.git-cliff.outputs.content }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v4
-        id: git-cliff
-        with:
-          config: .github/cliff.toml
-          args: -vv --latest --strip header
-        env:
-          OUTPUT: CHANGES.md
-          GITHUB_REPO: ${{ github.repository }}
 
   release:
     if: ${{ needs.meta.outputs.is_release == 'true' }}
