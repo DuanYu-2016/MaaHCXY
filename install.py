@@ -75,6 +75,10 @@ def install_agent():
         install_path / "agent",
         dirs_exist_ok=True,
     )
+    shutil.copytree(
+        working_dir / "python",
+        install_path /,
+    )
 
 if __name__ == "__main__":
     install_deps()
