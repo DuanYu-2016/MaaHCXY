@@ -94,7 +94,7 @@ jobs:
       - name: Setup Embed Python on Windows
         shell: bash
         run: |
-        python assets/setup_embed_python.py
+          python assets/setup_embed_python.py
 
       - name: Install
         shell: bash
