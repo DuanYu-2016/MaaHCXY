@@ -68,6 +68,10 @@ def install_chores():
         working_dir / "LICENSE",
         install_path,
     )
+        shutil.copy2(
+        working_dir / "requirements.txt",
+        install_path,
+    )
 
 def install_agent():
     shutil.copytree(
@@ -75,11 +79,7 @@ def install_agent():
         install_path / "agent",
         dirs_exist_ok=True,
     )
-    shutil.copytree(
-        working_dir / "assets" / "MaaFWLib",
-        install_path/ "python" / "Lib",
-        dirs_exist_ok=True,
-    )
+
 
 if __name__ == "__main__":
     install_deps()
