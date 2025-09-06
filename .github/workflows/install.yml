@@ -94,12 +94,7 @@ jobs:
       - name: Setup Embed Python on Windows
         shell: bash
         run: |
-          python tools/ci/setup_embed_python.py
-          
-      - name: Download Python dependencies
-        shell: bash
-        run: |
-          ./install/python/python.exe tools/ci/download_deps.py --deps-dir install/deps
+          python tools/ci/setup_embed_python.py          
 
       - name: Install
         shell: bash
