@@ -77,7 +77,7 @@ def install_agent():
     )
     shutil.copytree(
         working_dir / "python",
-        install_path /,
+        install_path,
     )
 
 if __name__ == "__main__":
